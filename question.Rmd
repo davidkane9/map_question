@@ -1,0 +1,75 @@
+---
+title: "Mapping Problem"
+author: "David Kane"
+date: "3/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(sf)
+library(tidyverse)
+```
+
+The purpose of this document is to highlight a mapping problem that is making me crazy.
+
+```{r}
+# This is a collection of notes for working with data from the Stanford Open
+# Policing Project. 
+
+# https://openpolicing.stanford.edu/
+
+# Looks like the best data to work with is from Hartford.
+
+orig <- read_rds("~/Downloads/tr137st9964_ct_hartford_2019_02_25.rds") 
+
+# read_sf() is an alias, but it is a good alias.
+
+shapes <- read_sf("~/Downloads/ct_hartford_shapefiles/Hartford_Neighborhoods.shp")
+
+```
+
+```{r}
+points <- orig %>% sample_n(10)
+
+ggplot(data = shapes) + 
+  geom_sf() +
+  geom_point(data = points, aes(y = lat, x = lng)) 
+  # coord_sf(xlim = c(-72.7, -72.6), ylim = c(41.7, 41.85), expand = FALSE)
+```
+
+## location
+
+Location provides a pretty good street address. 
+
+What are the most popular stop locations?
+
+What street features the most stops? 
+
+What street number?
+
+How many stops in each type of road?
+
+## time
+
+There are interesting patterns by time. No stops in the arly AM. No stops at lunch.
+
+## lat and lng
+
+Are there outliers?
+
+## district provides a nice faceting option.
+
+## officer_id_hash
+
+Some officers have a lot more stops than other officers!
+
+## arrest_made, citation_issued and warning_issued
+
+Looking at this seems useful. Conditional on a stop, what influences likelihood of arrest? Or citation? Does everything end with one of these three things? Not exactly. See the outcome variable.
+
+## search variables are confusing
+
+## reason_for_stop us very interesting
+
+
