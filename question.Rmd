@@ -58,18 +58,17 @@ print.data.frame(points)
 
 ```
 
-I just want to plot those 10 points on my map. I have a map and we have some points with appropriate latitude and longitude. So, why doesn't this work?
+I just want to plot those 10 points on my map. I have a map and we have some points with appropriate latitude and longitude. The trick is that you want the points to be a special kind of object. Once it is, you can just use it with `geom_sf`. The answer was in that three part tutorial. Just needed to read it!
 
 ```{r, echo=TRUE}
 
+sites <- st_as_sf(points, coords = c("lng", "lat"), crs = 4326)
+
 ggplot(data = shapes) +
   geom_sf() +
-  geom_point(data = points, aes(y = lat, x = lng))
+  geom_sf(data = sites)
 
 ```
 
-It looks like the points are being treated "as if" they come from a different location, forcing the map to show tiny Hartford in the upper right and the points, all bunched together, in the lower left. But we can see that the actual values for lat and lng put them right in Hartford, as we want.
-
-I suspect that I need to mess around with the `points` tibble itself, turning it into a different sort of object. Jacob suggested it should be a `SpatialPointsDataframe`. Or maybe this is a `sf_coord` issue, maybe having something to do with projections?
 
 
