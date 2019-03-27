@@ -7,11 +7,15 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(fs)
 library(sf)
 library(tidyverse)
 ```
 
-The purpose of this document is to highlight a mapping problem that is making me crazy. With luck, you can help! I am using data from the [Stanford Open Policing Project](https://openpolicing.stanford.edu/). Toward [the middle of this page](https://openpolicing.stanford.edu/data/) is the data for Hartford.
+The purpose of this document is to highlight a mapping problem that is making me crazy. With luck, you can help! I am using data from the [Stanford Open Policing Project](https://openpolicing.stanford.edu/). Toward [the middle of this page](https://openpolicing.stanford.edu/data/) is the data for Hartford. (Those new to mapping might want to start with [Chapter 7](http://socviz.co/maps.html#maps) of Healy. But note that Healy does not use geom_sf --- the 'sf' stands for simple features and is the current state of the art for making maps in R. To learn about sf, try [this three part tutorial](https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html).)
+
+
+It is straightforward to make a map of Hartford:
 
 ```{r}
 # Need two data sets. An RDS file with the traffic stops information and a shape
@@ -19,9 +23,17 @@ The purpose of this document is to highlight a mapping problem that is making me
 
 orig <- read_rds(url("https://stacks.stanford.edu/file/druid:tr137st9964/tr137st9964_ct_hartford_2019_02_25.rds")) 
 
-# read_sf() is an alias, but it is a good alias.
+# The shape files are tarred up, so we download them, unzip, load and then
+# delete. read_sf() is an alias, but it is a good alias. I wish there were a
+# cleaner way of doing these 4 steps . . .
 
-shapes <- read_sf(url("https://stacks.stanford.edu/file/druid:tr137st9964/tr137st9964_ct_hartford_shapefiles_2019_02_25.tgz"))
+download.file("https://stacks.stanford.edu/file/druid:tr137st9964/tr137st9964_ct_hartford_shapefiles_2019_02_25.tgz", destfile = "shapes.tgz")
+
+untar("shapes.tgz")
+
+shapes <- read_sf("ct_hartford_shapefiles/Hartford_Neighborhoods.shp")
+
+file_delete(c("shapes.tgz", "ct_hartford_shapefiles/"))
 
 # It is now easy to make a simple map of Hartford.
 
@@ -30,15 +42,34 @@ ggplot(data = shapes) +
 
 ```
 
-```{r, eval=FALSE}
-# points <- orig %>% sample_n(10)
-# 
-# ggplot(data = shapes) + 
-#   geom_sf() +
-#   geom_point(data = points, aes(y = lat, x = lng)) 
-  # coord_sf(xlim = c(-72.7, -72.6), ylim = c(41.7, 41.85), expand = FALSE)
+Note that Hartford is a relatively small city, with 0.1 of width/length in terms of longitude and lattitude. Fortunately, our data seems much more precise than that.
+
+
+```{r}
+set.seed(9)
+points <- orig %>% 
+  select(district, location, lat, lng) %>% 
+  sample_n(10)
+
+# Note that the default method for printing a tibble hides the significant
+# digits which are actually available.
+
+print.data.frame(points)
+
 ```
 
+I just want to plot those 10 points on my map. I have a map and we have some points with appropriate latitude and longitude. So, why doesn't this work?
 
+```{r, echo=TRUE}
+
+ggplot(data = shapes) +
+  geom_sf() +
+  geom_point(data = points, aes(y = lat, x = lng))
+
+```
+
+It looks like the points are being treated "as if" they come from a different location, forcing the map to show tiny Hartford in the upper right and the points, all bunched together, in the lower left. But we can see that the actual values for lat and lng put them right in Hartford, as we want.
+
+I suspect that I need to mess around with the `points` tibble itself, turning it into a different sort of object. Jacob suggested it should be a `SpatialPointsDataframe`. Or maybe this is a `sf_coord` issue, maybe having something to do with projections?
 
 
