@@ -39,38 +39,6 @@ ggplot(data = shapes) +
   # coord_sf(xlim = c(-72.7, -72.6), ylim = c(41.7, 41.85), expand = FALSE)
 ```
 
-## location
 
-Location provides a pretty good street address. 
-
-What are the most popular stop locations?
-
-What street features the most stops? 
-
-What street number?
-
-How many stops in each type of road?
-
-## time
-
-There are interesting patterns by time. No stops in the arly AM. No stops at lunch.
-
-## lat and lng
-
-Are there outliers?
-
-## district provides a nice faceting option.
-
-## officer_id_hash
-
-Some officers have a lot more stops than other officers!
-
-## arrest_made, citation_issued and warning_issued
-
-Looking at this seems useful. Conditional on a stop, what influences likelihood of arrest? Or citation? Does everything end with one of these three things? Not exactly. See the outcome variable.
-
-## search variables are confusing
-
-## reason_for_stop us very interesting
 
 
