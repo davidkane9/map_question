@@ -1,5 +1,5 @@
 ---
-title: "Mapping Problem"
+title: "Policing in Hartford"
 author: "David Kane"
 date: "3/25/2019"
 output: html_document
@@ -12,7 +12,11 @@ library(sf)
 library(tidyverse)
 ```
 
-The purpose of this document is to highlight a mapping problem that is making me crazy. With luck, you can help! I am using data from the [Stanford Open Policing Project](https://openpolicing.stanford.edu/). Toward [the middle of this page](https://openpolicing.stanford.edu/data/) is the data for Hartford. (Those new to mapping might want to start with [Chapter 7](http://socviz.co/maps.html#maps) of Healy. But note that Healy does not use geom_sf --- the 'sf' stands for simple features and is the current state of the art for making maps in R. To learn about sf, try [this three part tutorial](https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html).)
+For understanding mapping in R, start with [Chapter 7](http://socviz.co/maps.html#maps) in Healy. Then, because Healy does not use simple features (sf), the best modern approach to mapping, you should review [this three part tutorial](https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html).
+
+I am using data from the [Stanford Open Policing Project](https://openpolicing.stanford.edu/). Toward [the middle of this page](https://openpolicing.stanford.edu/data/) is the data for Hartford. 
+
+
 
 
 It is straightforward to make a map of Hartford:
@@ -48,14 +52,9 @@ Note that Hartford is a relatively small city, with 0.1 of width/length in terms
 ```{r}
 set.seed(9)
 points <- orig %>% 
-  select(district, location, lat, lng) %>% 
-  sample_n(10)
-
-# Note that the default method for printing a tibble hides the significant
-# digits which are actually available.
-
-print.data.frame(points)
-
+  select(district, location, lat, lng, subject_race) %>% 
+  drop_na(lng, lat) %>% 
+  sample_n(100)
 ```
 
 I just want to plot those 10 points on my map. I have a map and we have some points with appropriate latitude and longitude. The trick is that you want the points to be a special kind of object. Once it is, you can just use it with `geom_sf`. The answer was in that three part tutorial. Just needed to read it!
@@ -66,7 +65,7 @@ sites <- st_as_sf(points, coords = c("lng", "lat"), crs = 4326)
 
 ggplot(data = shapes) +
   geom_sf() +
-  geom_sf(data = sites)
+  geom_sf(data = sites, size = 0.1, aes(color = subject_race))
 
 ```
 
